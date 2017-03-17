@@ -7,7 +7,7 @@ var path = require('path');
 
 module.exports = {
 	HOST: '127.0.0.1',
-	PORT: '8080',
+	PORT: '3000',
 
 	// Variables used internally
 	MONGO_VERSION: '3.2.8',
