@@ -14,8 +14,9 @@ block content
 	script(src="https://openlayers.org/en/v4.0.1/build/ol.js")
 	div(class='panel panel-default')
 		div.panel-body
-			h1 Test
-			p Simple Website for tracking population 'heat maps' using MQTT
+			h2 Mobile Computing
+			h3 Lab 4
+			p Below is a heatmap that represents 4 locations on a map.  These locations keep track of how many people are nearby using Beacons and a 'Capacity Sensor' on an ARM mbed board.  The points on the map represent the location of the Beacons, and the 
 			
 			// Implement the graphics portion in the canvas supplied below
 			div.well
@@ -49,17 +50,13 @@ block scripts
 		$(() => {
 			// Handle any canvas code here
 			//----------------------------
-			//var canv = $('#map');
 
 			//Coordinates for the Ridge
 			var regularCoordinates = [29.632368, -82.379892]
 			var ridge = ol.proj.fromLonLat([regularCoordinates[1], regularCoordinates[0]]);
 			
 			//variables for ease of testing beacons.
-			var left = -82.379895;
-			var right = -82.379889;
-			var top = 29.632372;
-			var bot = 29.632364;
+			var left = -82.379895, right = -82.379889, top = 29.632372, bot = 29.632364;
 
 			//Beacon objects
 			var blueberry = {
@@ -87,13 +84,16 @@ block scripts
 			var beacons = [blueberry, icy, mint, evanIcy];
 			var features = new Array(beacons.length);
 			
-			var e = 4500000;
-			e = 30;
+			//Originally used to randomize clusters
+			//- var e = 30;
+			
+			//For each beacon, calculate its coordinates and put it on the map. 
 			for (var i = 0; i < beacons.length; ++i) {
 				var coordinates = ol.proj.fromLonLat([beacons[i].lon, beacons[i].lat]);
 				features[i] = new ol.Feature(new ol.geom.Point(coordinates));
 			}
 				
+			
 			var source = new ol.source.Vector({
 				features: features
 			});

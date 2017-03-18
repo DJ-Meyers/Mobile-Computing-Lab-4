@@ -95,6 +95,9 @@ function setupExpress() {
 		res.render('index', {title: 'MQTT Tracker'});
 	});
 
+	//This is where the RESTful API request handling will be
+	
+
 	// Basic 404 Page
 	app.use((req, res, next) => {
 		var err = {
