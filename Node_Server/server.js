@@ -1,9 +1,9 @@
 /*
  * Server.js
- * 
+ *
  * The main portion of this project. Contains all the defined routes for express,
  * rules for the websockets, and rules for the MQTT broker.
- * 
+ *
  * Refer to the portions surrounded by --- for points of interest
  */
 var express   = require('express'),
@@ -14,16 +14,22 @@ var path      = require('path');
 
 var conf      = require(path.join(__dirname, 'config'));
 var internals = require(path.join(__dirname, 'internals'));
+var keys 	  = require(path.join(__dirname, 'keys'));
+var map;
+var MAP_API_KEY = keys.API;
+//console.log(MAP_API_KEY);
+//var src="https://maps.googleapis.com/maps/api/js?key=" + MAP_API_KEY + "&callback=initMap";
 
 // -- Setup the application
 setupExpress();
 setupSocket();
+setupMap();
 
 
 // -- Socket Handler
 // Here is where you should handle socket/mqtt events
-// The mqtt object should allow you to interface with the MQTT broker through 
-// events. Refer to the documentation for more info 
+// The mqtt object should allow you to interface with the MQTT broker through
+// events. Refer to the documentation for more info
 // -> https://github.com/mcollina/mosca/wiki/Mosca-basic-usage
 // ----------------------------------------------------------------------------
 function socket_handler(socket, mqtt) {
@@ -46,7 +52,7 @@ function socket_handler(socket, mqtt) {
 		if (!client) return;
 
 		socket.emit('debug', {
-			type: 'PUBLISH', 
+			type: 'PUBLISH',
 			msg: 'Client "' + client.id + '" published "' + JSON.stringify(data) + '"'
 		});
 	});
@@ -128,7 +134,15 @@ function setupSocket() {
 		});
 	});
 
-	server.listen(conf.PORT, conf.HOST, () => { 
+	server.listen(conf.PORT, conf.HOST, () => {
 		console.log("Listening on: " + conf.HOST + ":" + conf.PORT);
 	});
+}
+
+function setupMap(){
+    // map = new google.maps.Map(document.getElementById('grid'), {
+    //   center: {lat: -34.397, lng: 150.644},
+    //   zoom: 8
+    // });
+
 }
