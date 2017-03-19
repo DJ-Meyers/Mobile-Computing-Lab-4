@@ -21,12 +21,20 @@ block content
 			// Implement the graphics portion in the canvas supplied below
 			div.well
 				div(id='map', class="map")
+				div(id='button-div')
+					button(id='zone-1', type='button') Zone 1
+					button(id='zone-2', type='button') Zone 2
+					button(id='zone-3', type='button') Zone 3
+					button(id='zone-4', type='button') Zone 4
+					button(id='get', type='button') Get
 
 	div(class='panel')
 		div.panel-body
 			button(class='btn btn-primary', type='button', data-toggle='collapse', data-target='#debugLog', aria-expanded='false', aria-controls='debugLog') Show Debug Log
 			div(id='debugLog', class='collapse')
 				div(id='debugLogList', class='well')
+					
+					
 
 //- The scripts needed by this page
 block scripts
@@ -66,16 +74,19 @@ block scripts
 			};
 			var icy = {
 				name: 'Icy Marshmallow',
+				capacity: 3,
 				lat: top,
 				lon: right
 			};
 			var mint = {
 				name: 'Mint Cocktail',
+				capacity: 5,
 				lat: bot,
 				lon: left
 			};
 			var evanIcy = {
 				name: 'Evans Icy Marshamllow',
+				capacity: 2,
 				lat: bot,
 				lon: right
 			};
@@ -84,22 +95,75 @@ block scripts
 			var beacons = [blueberry, icy, mint, evanIcy];
 			var features = new Array(beacons.length);
 			
-			//Originally used to randomize clusters
-			//- var e = 30;
 			
 			//For each beacon, calculate its coordinates and put it on the map. 
 			for (var i = 0; i < beacons.length; ++i) {
 				var coordinates = ol.proj.fromLonLat([beacons[i].lon, beacons[i].lat]);
 				features[i] = new ol.Feature(new ol.geom.Point(coordinates));
 			}
-				
+
 			
+			function incrementCapacity(id) {
+				//Make the POST request to increment a zone's population
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("POST", "/increaseCapacity/" + id.toString(), false);
+				xhttp.setRequestHeader("Content-type", "application/json");
+				xhttp.send();
+				var response = JSON.parse(xhttp.responseText);
+				//console.log(response);
+			}
+			
+			function getCapacity(id) {
+				//Make the GET request to find out a zone's population
+				var xhttp = new XMLHttpRequest();
+				xhttp.open("Get", "/getCapacity/" + id.toString(), false);
+				xhttp.setRequestHeader("Content-type", "application/json");
+				xhttp.send();
+				var response = JSON.parse(xhttp.responseText);
+				return response;
+			}
+			
+			var id = 0;
+			var zone1 = $('#zone-1').click(function(){
+				id = 1;
+				incrementCapacity(id);
+				//- console.log(id, left, top);
+				//- var coordinates = ol.proj.fromLonLat(left, top);
+				//- console.log(new ol.geom.Point(coordinates).toString());
+				//- features.push(new ol.Feature(new ol.geom.Point(coordinates)));
+				
+			});
+			
+			var zone2 = $('#zone-2').click(function(){
+				id = 2;
+				incrementCapacity(id);
+			});
+			
+			var zone3 = $('#zone-3').click(function(){
+				id = 3;
+				incrementCapacity(id);
+			});
+			
+			var zone4 = $('#zone-4').click(function(){
+				id = 4;
+				incrementCapacity(id);
+			});
+			
+			var get = $('#get').click(function(){
+				console.log('Current Populations');
+				//Iterate through zones and print their populations
+				for(var i = 1; i <= 4; i++) {
+					console.log(i.toString() + ": " + getCapacity(i).toString());
+				}
+			});
+			
+			//Code needed for clusters
 			var source = new ol.source.Vector({
 				features: features
 			});
 				
 			var clusterSource = new ol.source.Cluster({
-				distance: 1,
+				distance: 10,
 				source: source
 			});
 					
@@ -146,9 +210,9 @@ block scripts
 					zoom: 18
 				})
 			});
-				
-			
 								
 			//----------------------------
 		});
+		
+	
 	

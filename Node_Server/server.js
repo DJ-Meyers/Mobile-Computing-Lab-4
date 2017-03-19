@@ -14,21 +14,16 @@ var path      = require('path');
 
 var conf      = require(path.join(__dirname, 'config'));
 var internals = require(path.join(__dirname, 'internals'));
-//var keys 	  = require(path.join(__dirname, 'keys'));
-var map;
-//var MAP_API_KEY = keys.API;
+
 
 var capacity1 = 0;
 var capacity2 = 0;
 var capacity3 = 0;
 var capacity4 = 0;              //var we update as people enter areas
-//console.log(MAP_API_KEY);
-//var src="https://maps.googleapis.com/maps/api/js?key=" + MAP_API_KEY + "&callback=initMap";
 
 // -- Setup the application
 setupExpress();
 setupSocket();
-setupMap();
 
 
 // -- Socket Handler
@@ -101,7 +96,7 @@ function setupExpress() {
 	});
 
 	//This is where the RESTful API request handling will be
-	
+
 	app.post('/increaseCapacity/:beaconID', (req, res) => {
 		//increment capacity
 		var tempCapacity = 0;
@@ -139,17 +134,17 @@ function setupExpress() {
 			zone = 1;
 		}
 		else if(req.params.beaconID == 2){
-		
+
 			tempCapacity = capacity2;
 			zone = 2;
 		}
 		else if(req.params.beaconID == 3){
-			
+
 			tempCapacity = capacity3;
 			zone = 3;
 		}
 		else if(req.params.beaconID == 4){
-		
+
 			tempCapacity = capacity4;
 			zone = 4;
 		}
@@ -202,12 +197,3 @@ function setupSocket() {
 		console.log("Listening on: " + conf.HOST + ":" + conf.PORT);
 	});
 }
-
-function setupMap(){
-    // map = new google.maps.Map(document.getElementById('grid'), {
-    //   center: {lat: -34.397, lng: 150.644},
-    //   zoom: 8
-    // });
-
-}
-
