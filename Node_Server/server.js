@@ -121,8 +121,7 @@ function setupExpress() {
 			tempCapacity = capacity4;
 			zone = 4;
 		}
-		console.log('The population in zone ' + zone + ' was incremented to ');
-		console.log(tempCapacity);
+		console.log('The population in zone ' + zone + ' was incremented to ' + tempCapacity);
 		res.end( tempCapacity.toString() );
 	});
 
@@ -148,8 +147,7 @@ function setupExpress() {
 			tempCapacity = capacity4;
 			zone = 4;
 		}
-		console.log('The population of zone ' + zone + ' is ');
-		console.log(tempCapacity);
+		console.log('The population of zone ' + zone + ' is ' + tempCapacity);
 		res.end( tempCapacity.toString() );
 	});
 
