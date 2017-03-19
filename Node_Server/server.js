@@ -14,9 +14,14 @@ var path      = require('path');
 
 var conf      = require(path.join(__dirname, 'config'));
 var internals = require(path.join(__dirname, 'internals'));
-var keys 	  = require(path.join(__dirname, 'keys'));
+//var keys 	  = require(path.join(__dirname, 'keys'));
 var map;
-var MAP_API_KEY = keys.API;
+//var MAP_API_KEY = keys.API;
+
+var capacity1 = 0;
+var capacity2 = 0;
+var capacity3 = 0;
+var capacity4 = 0;              //var we update as people enter areas
 //console.log(MAP_API_KEY);
 //var src="https://maps.googleapis.com/maps/api/js?key=" + MAP_API_KEY + "&callback=initMap";
 
@@ -97,6 +102,62 @@ function setupExpress() {
 
 	//This is where the RESTful API request handling will be
 	
+	app.post('/increaseCapacity/:beaconID', (req, res) => {
+		//increment capacity
+		var tempCapacity = 0;
+		var zone = 0;
+		if(req.params.beaconID == 1){
+			capacity1++;
+			tempCapacity = capacity1;
+			zone = 1;
+		}
+		else if(req.params.beaconID == 2){
+			capacity2++;
+			tempCapacity = capacity2;
+			zone = 2;
+		}
+		else if(req.params.beaconID == 3){
+			capacity3++;
+			tempCapacity = capacity3;
+			zone = 3;
+		}
+		else if(req.params.beaconID == 4){
+			capacity4++;
+			tempCapacity = capacity4;
+			zone = 4;
+		}
+		console.log('The population in zone ' + zone + ' was incremented to ');
+		console.log(tempCapacity);
+		res.end( tempCapacity.toString() );
+	});
+
+	app.get('/getCapacity/:beaconID', (req, res) => {
+		var tempCapacity = 0;
+		var zone = 0;
+		if(req.params.beaconID == 1){
+			tempCapacity = capacity1;
+			zone = 1;
+		}
+		else if(req.params.beaconID == 2){
+		
+			tempCapacity = capacity2;
+			zone = 2;
+		}
+		else if(req.params.beaconID == 3){
+			
+			tempCapacity = capacity3;
+			zone = 3;
+		}
+		else if(req.params.beaconID == 4){
+		
+			tempCapacity = capacity4;
+			zone = 4;
+		}
+		console.log('The population of zone ' + zone + ' is ');
+		console.log(tempCapacity);
+		res.end( tempCapacity.toString() );
+	});
+
 
 	// Basic 404 Page
 	app.use((req, res, next) => {
@@ -149,3 +210,4 @@ function setupMap(){
     // });
 
 }
+

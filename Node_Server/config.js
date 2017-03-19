@@ -9,7 +9,7 @@ module.exports = {
 	//Change ip to this later 192.168.0.101
 	//localhost is 127.0.0.1
 	HOST: '127.0.0.1',
-	PORT: '3000',
+	PORT: '8080',
 
 	// Variables used internally
 	MONGO_VERSION: '3.2.8',
