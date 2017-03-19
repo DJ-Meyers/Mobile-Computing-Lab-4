@@ -84,12 +84,7 @@ block scripts
 			var id = 0;
 			var zone1 = $('#zone-1').click(function(){
 				id = 1;
-				incrementCapacity(id);
-				//- console.log(id, left, top);
-				//- var coordinates = ol.proj.fromLonLat(left, top);
-				//- console.log(new ol.geom.Point(coordinates).toString());
-				//- features.push(new ol.Feature(new ol.geom.Point(coordinates)));
-				
+				incrementCapacity(id);				
 			});
 			
 			var zone2 = $('#zone-2').click(function(){
@@ -116,101 +111,38 @@ block scripts
 			});
 			
 			//Coordinates for the Ridge
-			var regularCoordinates = [29.632368, -82.379892]
-			//var ridge = ol.proj.fromLonLat([regularCoordinates[1], regularCoordinates[0]]);
+			var center = [29.632368, -82.379892]
 			
 			//variables for ease of testing beacons.
 			var left = -82.3799, right = -82.3798, top = 29.6324, bot = 29.6323;
 
 			//Beacon objects
-			var blueberry = {
-				name: 'Blueberry Pi',
+			var zone1 = {
+				name: 'Zone 1',
+				id: 1,
 				lat: top,
 				lon: left
 			};
-			var icy = {
-				name: 'Icy Marshmallow',
-				capacity: 3,
+			var zone2 = {
+				name: 'Zone 2',
+				id: 2,
 				lat: top,
 				lon: right
 			};
-			var mint = {
-				name: 'Mint Cocktail',
-				capacity: 5,
-				lat: bot,
-				lon: left
-			};
-			var evanIcy = {
-				name: 'Evans Icy Marshamllow',
-				capacity: 2,
+			var zone3 = {
+				name: 'Zone 3',
+				id: 3,
 				lat: bot,
 				lon: right
 			};
+			var zone4 = {
+				name: 'Zone 4',
+				id: 4,
+				lat: bot,
+				lon: left
+			};
 			
-			//Beacon and feature arrays
-			//- var beacons = [blueberry, icy, mint, evanIcy];
-			//- var features = new Array(beacons.length);
-			//- 
-			//- 
-			//- //For each beacon, calculate its coordinates and put it on the map. 
-			//- for (var i = 0; i < beacons.length; ++i) {
-			//- 	var coordinates = ol.proj.fromLonLat([beacons[i].lon, beacons[i].lat]);
-			//- 	features[i] = new ol.Feature(new ol.geom.Point(coordinates));
-			//- }
-			
-			//Code needed for clusters
-			//- var source = new ol.source.Vector({
-			//- 	features: features
-			//- });
-			//- 	
-			//- var clusterSource = new ol.source.Cluster({
-			//- 	distance: 10,
-			//- 	source: source
-			//- });
-			//- 		
-			//- var styleCache = {};
-			//- var clusters = new ol.layer.Vector({
-			//- 	source: clusterSource,
-			//- 	style: function(feature) {
-			//- 		var size = feature.get('features').length;
-			//- 		var style = styleCache[size];
-			//- 		if (!style) {
-			//- 			style = new ol.style.Style({
-			//- 				image: new ol.style.Circle({
-			//- 					radius: 10,
-			//- 					stroke: new ol.style.Stroke({
-			//- 						color: '#fff'
-			//- 					}),
-			//- 					fill: new ol.style.Fill({
-			//- 						color: '#3399CC'
-			//- 					})
-			//- 				}),
-			//- 				text: new ol.style.Text({
-			//- 					text: size.toString(),
-			//- 					fill: new ol.style.Fill({
-			//- 						color: '#fff'
-			//- 					})
-			//- 				})
-			//- 			});
-			//- 			styleCache[size] = style;
-			//- 		}
-			//- 		return style;
-			//- 	}
-			//- });
-			//- 	
-			//- var raster = new ol.layer.Tile({
-			//- 	source: new ol.source.OSM()
-			//- });
-			//- 
-			//- var map = new ol.Map({
-			//- 	layers: [raster, clusters],
-			//- 	target: 'map',
-			//- 	view: new ol.View({
-			//- 		//Center the map with a zoom of 18 on Joe's neighborhood
-			//- 		center: ridge,
-			//- 		zoom: 18
-			//- 	})
-			//- });//End of cluster code
+			var zones = [zone1, zone2, zone3, zone4];
 			
 			//Code for markers
 			map = new OpenLayers.Map("map");
@@ -219,46 +151,27 @@ block scripts
 		    epsg4326 =  new OpenLayers.Projection("EPSG:4326"); //WGS 1984 projection
 		    projectTo = map.getProjectionObject(); //The map projection (Spherical Mercator)
 		   
-		   //29.632368, -82.379892
+			//Coordinates for center of map
 		    var lonLat = new OpenLayers.LonLat( -82.379892 ,29.632368 ).transform(epsg4326, projectTo);
 		          
-		    
+		    //Center the map at the Ridge with zoom 18
 		    var zoom=18;
 		    map.setCenter(lonLat, zoom);
 
+			//Create vector layer that will contain markers
 		    var vectorLayer = new OpenLayers.Layer.Vector("Overlay");
 		    
-		    // Define markers as "features" of the vector layer:
-		    var feature = new OpenLayers.Feature.Vector(
-		            new OpenLayers.Geometry.Point( left, top ).transform(epsg4326, projectTo),
-		            {description:'This is Zone 1.<br>Population: ', id:'1'} ,
-		            {externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
-		        );    
-		    vectorLayer.addFeatures(feature);
+			// Define markers as "features" of the vector layer:
+			for(var i = 0; i < zones.length; i++) {
+				var feature = new OpenLayers.Feature.Vector(
+						new OpenLayers.Geometry.Point( zones[i].lon, zones[i].lat ).transform(epsg4326, projectTo),
+						{description:'This is '+zones[i].name+'.<br>Population: ', id: zones[i].id} ,
+						{externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
+					);    
+				vectorLayer.addFeatures(feature);
+			}			
 			
-			var feature = new OpenLayers.Feature.Vector(
-		            new OpenLayers.Geometry.Point( right, top ).transform(epsg4326, projectTo),
-		            {description:'This is Zone 2.<br>Population: ', id:'2'} ,
-		            {externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
-		        );    
-		    vectorLayer.addFeatures(feature);
-			
-			var feature = new OpenLayers.Feature.Vector(
-		            new OpenLayers.Geometry.Point( right, bot ).transform(epsg4326, projectTo),
-		            {description:'This is Zone 3.<br>Population: ', id:'3'} ,
-		            {externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
-					
-		        );    
-		    vectorLayer.addFeatures(feature);
-			
-			var feature = new OpenLayers.Feature.Vector(
-		            new OpenLayers.Geometry.Point( left, bot ).transform(epsg4326, projectTo),
-		            {description:'This is Zone 4.<br>Population: ', id:'4'} ,
-		            {externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
-		        );    
-		    vectorLayer.addFeatures(feature);
-			
-			  
+			//Add the Vector layer to the map  
 		    map.addLayer(vectorLayer);
 			
 		    
