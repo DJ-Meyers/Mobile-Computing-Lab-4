@@ -60,20 +60,20 @@ block scripts
 			//----------------------------
 			
 			//Functions for sending a request to REST API.  These will be tied to buttons on the page for ease of testing.
-			function incrementCapacity(id) {
+			function incrementPopulation(id) {
 				//Make the POST request to increment a zone's population
 				var xhttp = new XMLHttpRequest();
-				xhttp.open("POST", "/increaseCapacity/" + id.toString(), false);
+				xhttp.open("POST", "/incrementPopulation/" + id.toString(), false);
 				xhttp.setRequestHeader("Content-type", "application/json");
 				xhttp.send();
 				var response = JSON.parse(xhttp.responseText);
 				//console.log(response);
 			}
 			
-			function getCapacity(id) {
+			function getPopulation(id) {
 				//Make the GET request to find out a zone's population
 				var xhttp = new XMLHttpRequest();
-				xhttp.open("Get", "/getCapacity/" + id.toString(), false);
+				xhttp.open("Get", "/getPopulation/" + id.toString(), false);
 				xhttp.setRequestHeader("Content-type", "application/json");
 				xhttp.send();
 				var response = JSON.parse(xhttp.responseText);
@@ -84,29 +84,29 @@ block scripts
 			var id = 0;
 			var zone1 = $('#zone-1').click(function(){
 				id = 1;
-				incrementCapacity(id);				
+				incrementPopulation(id);				
 			});
 			
 			var zone2 = $('#zone-2').click(function(){
 				id = 2;
-				incrementCapacity(id);
+				incrementPopulation(id);
 			});
 			
 			var zone3 = $('#zone-3').click(function(){
 				id = 3;
-				incrementCapacity(id);
+				incrementPopulation(id);
 			});
 			
 			var zone4 = $('#zone-4').click(function(){
 				id = 4;
-				incrementCapacity(id);
+				incrementPopulation(id);
 			});
 			
 			var get = $('#get').click(function(){
 				console.log('Current Populations');
 				//Iterate through zones and print their populations
 				for(var i = 1; i <= 4; i++) {
-					console.log(i.toString() + ": " + getCapacity(i).toString());
+					console.log(i.toString() + ": " + getPopulation(i).toString());
 				}
 			});
 			
@@ -184,7 +184,7 @@ block scripts
 		      feature.popup = new OpenLayers.Popup.FramedCloud("pop",
 		          feature.geometry.getBounds().getCenterLonLat(),
 		          null,
-		          '<div class="markerContent">'+feature.attributes.description+getCapacity(feature.attributes.id).toString()+'</div>',
+		          '<div class="markerContent">'+feature.attributes.description+getPopulation(feature.attributes.id).toString()+'</div>',
 		          null,
 		          true,
 		          function() { controls['selector'].unselectAll(); }

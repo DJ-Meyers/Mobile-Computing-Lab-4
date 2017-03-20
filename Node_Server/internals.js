@@ -1,16 +1,16 @@
 /*
  * Internals.js
- * 
+ *
  * This file contains all of the code necessary for setting up the MQTT broker
  * and corresponding MongoDB backend.
- * 
- * Some methods of interest are: 
+ *
+ * Some methods of interest are:
  *  - mosca
  *    * A reference to the running instance of MOSCA
  *    * The property 'on' should be used to set custom handlers for MQTT events
  *  - ready
  *    * Returns true __IFF__ MOSCA and MongoDB are setup
- * 
+ *
  * You do __NOT__ need to edit this (but feel free to look around)
  */
 
@@ -33,7 +33,7 @@ var self = module.exports = {
 		// Setup MongoDB
 		nems.start(conf.MONGO_VERSION, conf.MONGO_DIR, conf.MONGO_PORT).then(pid => {
 			console.log("MongoDB started with PID: " + pid);
-			
+
 			// Setup MOSCA to use MongoDB
 			self.mosca = new mosca.Server({
 				port:    conf.MOSCA_PORT,
@@ -46,10 +46,10 @@ var self = module.exports = {
 			});
 
 			// Report that the internals are ready when MOSCA is set up
-			self.mosca.on('ready', () => { 
+			self.mosca.on('ready', () => {
 				self.ready = true;
 
-				callback(self.mosca); 
+				callback(self.mosca);
 			});
 		}).catch(err => { throw err; });
 	},
