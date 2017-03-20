@@ -14,25 +14,20 @@ var path      = require('path');
 var mqttReq   = require('mqtt')
 var client    = mqttReq.connect();
 
+//Subscribe to increment messages from the boards for every zone
 client.subscribe("1increment");
 client.subscribe("2increment");
 client.subscribe("3increment");
 client.subscribe("4increment");
-//
+
+//When a message arrives from the board, execute logic to increment
 client.on("message", function(topic, payload) {
-	console.log([topic, payload].join(": "));
 	if(topic.search("increment") > 0) {
 		var zoneId = topic.substring(0, topic.search("increment"));
 		incrementPopulation(zoneId);
-		// if(isOverCapacity(zoneId)){
-		// 	var capacityTopic = zoneId + 'capacity';
-		// 	client.publish(capacityTopic, "1");
-		// }
 		isOverCapacity(zoneId);
 	}
 });
-//
-
 
 var conf      = require(path.join(__dirname, 'config'));
 var internals = require(path.join(__dirname, 'internals'));
@@ -76,10 +71,10 @@ function isOverCapacity(id){
 
 	if(tempPopulation > tempMax) {
 		console.log('Population in Zone ' + id + ' is ' + tempPopulation + ' which is greater than the max ' + tempMax);
-		//if(isOverCapacity(client.id)){
-			var capacityTopic = id + 'capacity';
-			client.publish(capacityTopic, "1");
-		//}
+
+		//Send the alert to the mbed board that the population is exceeding the capacity
+		var capacityTopic = id + 'capacity';
+		client.publish(capacityTopic, "1");
 		return true;
 	} else {
 		return false;
@@ -91,24 +86,15 @@ function getPopulation(id){
 	var validInput = true;
 	switch(id) {
 		case '1':
-			//isOverCapacity(id);
 			return(population1);
-			break;
 		case '2':
-			//isOverCapacity(id);
 			return(population2);
-			break;
 		case '3':
-			//isOverCapacity(id);
 			return(population3);
-			break;
 		case '4':
-			//isOverCapacity(id);
 			return(population4);
-			break;
 		default:
 			console.log('getPopulation: Invalid Zone ID');
-			validInput = false;
 			return 0;
 	}
 
@@ -173,21 +159,7 @@ function socket_handler(socket, mqtt) {
 			type: 'PUBLISH',
 			msg: 'Client "' + client.id + '" published "' + JSON.stringify(data) + '"'
 		});
-
-
-		// if(data.topic.search("increment") > 0) {
-		// 	var incrementId = data.topic.substring(0, data.topic.search("increment"));
-		// 	incrementPopulation(incrementId);
-		// } else if (data.topic.search("capacity") > 0) {
-		// 	console.log('Publishing over capacity');
-		// 	client.publish()
-		// }
-
-
-
 		console.log('Client "' + client.id + '" published "' + JSON.stringify(data) + '"');
-
-
 	});
 
 	// Called when a client subscribes
@@ -236,7 +208,7 @@ function setupExpress() {
 
 	//Increase the population at a beacon with a specified ID
 	app.get('/incrementPopulation/:beaconID', (req, res) => {
-
+		//Increment the Population at zone and check if it's over the capacity
 		incrementPopulation(req.params.beaconID);
 		isOverCapacity(req.params.beaconID);
 		res.end( getPopulation(req.params.beaconID).toString() );

@@ -14,27 +14,33 @@ block content
 	script(src="http://www.openlayers.org/api/OpenLayers.js")
 	div(class='panel panel-default')
 		div.panel-body
-			h2 Mobile Computing
-			h3 Lab 4
-			p Below is a heatmap that represents 4 locations on a map.  These locations keep track of how many people are nearby using Beacons and a 'Capacity Sensor' on an ARM mbed board.  The points on the map represent the location of the Beacons, and the
+			h2 Zone Heat Map
+			h3 The Baeconators - Evan Amstutz, DJ Meyers, Joe O'Connor, Jon-Kyle Smith
+			p Below is a heatmap that represents 4 locations on a map.  These locations keep track of how many people are nearby using Beacons and a 'Capacity Sensor' on an ARM mbed board.  The points on the map represent the location of the Beacons.  You can click on the markers on the map to see the population at each one.  The populations are reset to 0 when the server restarts.
+			p Because our beacons were ordered from Amazon, they were not registered with Estimote and we could not get their UUIDs and determine which beacon was being detected.  We tried running our phones as virtual beacons, but the issue persisted.  Since we could not retrieve locations from beacons, we created four dummy locations that represented the different zones.
 
 			// Implement the graphics portion in the canvas supplied below
 			div.well
 				div(id='map', class="map")
-				div(id='button-div')
-					button(id='zone-1', type='button') Zone 1
-					button(id='zone-2', type='button') Zone 2
-					button(id='zone-3', type='button') Zone 3
-					button(id='zone-4', type='button') Zone 4
-					button(id='get', type='button') Get
+	
+	div.panel.panel-default
+		div.panel-body
+			h3 REST API requests
+			p Below are buttons that were used during development to test the REST API before the Android app was developed.  They've been left in the final product for demonstration purposes.  Clicking on a button will cause its respective zone to increase its population by 1.  You can view the populations of all the zones in your browser console or the terminal running the server by clicking Get.  When the population in a zone exceeds its capacity, it will print to the terminal as well as cause the corresponding ARM mbed board to flash its light red.
+			div.btn-toolbar(role="toolbar")
+				div.btn-group(role="group")
+					button.btn.btn-primary#zone-1(type='button') Zone 1
+					button.btn.btn-primary#zone-2(type='button') Zone 2
+					button.btn.btn-primary#zone-3(type='button') Zone 3
+					button.btn.btn-primary#zone-4(type='button') Zone 4
+				div.btn-group(role="group")
+					button.btn.btn-success#get(type='button') Get
 
 	div(class='panel')
 		div.panel-body
 			button(class='btn btn-primary', type='button', data-toggle='collapse', data-target='#debugLog', aria-expanded='false', aria-controls='debugLog') Show Debug Log
 			div(id='debugLog', class='collapse')
 				div(id='debugLogList', class='well')
-
-
 
 //- The scripts needed by this page
 block scripts
