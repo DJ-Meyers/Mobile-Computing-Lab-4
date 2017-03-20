@@ -24,10 +24,11 @@ client.on("message", function(topic, payload) {
 	if(topic.search("increment") > 0) {
 		var zoneId = topic.substring(0, topic.search("increment"));
 		incrementPopulation(zoneId);
-		if(isOverCapacity(zoneId)){
-			var capacityTopic = zoneId + 'capacity';
-			client.publish(capacityTopic, "1");
-		}
+		// if(isOverCapacity(zoneId)){
+		// 	var capacityTopic = zoneId + 'capacity';
+		// 	client.publish(capacityTopic, "1");
+		// }
+		isOverCapacity(zoneId);
 	}
 });
 //
@@ -75,7 +76,10 @@ function isOverCapacity(id){
 
 	if(tempPopulation > tempMax) {
 		console.log('Population in Zone ' + id + ' is ' + tempPopulation + ' which is greater than the max ' + tempMax);
-
+		//if(isOverCapacity(client.id)){
+			var capacityTopic = id + 'capacity';
+			client.publish(capacityTopic, "1");
+		//}
 		return true;
 	} else {
 		return false;
@@ -171,12 +175,15 @@ function socket_handler(socket, mqtt) {
 		});
 
 
-		if(data.topic.search("increment") > 0) {
-			var incrementId = data.topic.substring(0, data.topic.search("increment"));
-			incrementPopulation(incrementId);
-		} else if (data.topic.search("capacity") > 0) {
-			console.log('Publishing over capacity');
-		}
+		// if(data.topic.search("increment") > 0) {
+		// 	var incrementId = data.topic.substring(0, data.topic.search("increment"));
+		// 	incrementPopulation(incrementId);
+		// } else if (data.topic.search("capacity") > 0) {
+		// 	console.log('Publishing over capacity');
+		// 	client.publish()
+		// }
+
+
 
 		console.log('Client "' + client.id + '" published "' + JSON.stringify(data) + '"');
 
@@ -231,8 +238,8 @@ function setupExpress() {
 	app.get('/incrementPopulation/:beaconID', (req, res) => {
 
 		incrementPopulation(req.params.beaconID);
-
-		res.end( 'success' );
+		isOverCapacity(req.params.beaconID);
+		res.end( getPopulation(req.params.beaconID).toString() );
 	});
 
 	//Get the population of at a beacon with the specified ID
