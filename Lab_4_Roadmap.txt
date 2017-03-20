@@ -8,14 +8,14 @@ Android App
 Node Server
 	+ Should keep and mantain the capacity of 4 areas.
 	+ Define a REST API to be used by the Android app
-	* Communicate with the mbed boards through MQTT
-		- Publish total capacity
-		- Subscribe to capacity from each board
+	+ Communicate with the mbed boards through MQTT
+		* Publish total capacity
+		* Subscribe to capacity from each board
 	+ Display heat map
 
-MBED
+MBED	//Done
 	+ On click, increment capacity
-	* Communicate with Node Server through MQTT
-		- Subscribe to total capacity
-			- When total capacity exceeds a certain number, turn the light red.
-		- Publish capacity sensor count
+	+ Communicate with Node Server through MQTT
+		+ Subscribe to over capacity
+			+ When population exceeds a certain number, turn the light red.
+		+ Publish capacity sensor increment

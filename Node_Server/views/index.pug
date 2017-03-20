@@ -16,8 +16,8 @@ block content
 		div.panel-body
 			h2 Mobile Computing
 			h3 Lab 4
-			p Below is a heatmap that represents 4 locations on a map.  These locations keep track of how many people are nearby using Beacons and a 'Capacity Sensor' on an ARM mbed board.  The points on the map represent the location of the Beacons, and the 
-			
+			p Below is a heatmap that represents 4 locations on a map.  These locations keep track of how many people are nearby using Beacons and a 'Capacity Sensor' on an ARM mbed board.  The points on the map represent the location of the Beacons, and the
+
 			// Implement the graphics portion in the canvas supplied below
 			div.well
 				div(id='map', class="map")
@@ -33,8 +33,8 @@ block content
 			button(class='btn btn-primary', type='button', data-toggle='collapse', data-target='#debugLog', aria-expanded='false', aria-controls='debugLog') Show Debug Log
 			div(id='debugLog', class='collapse')
 				div(id='debugLogList', class='well')
-					
-					
+
+
 
 //- The scripts needed by this page
 block scripts
@@ -58,18 +58,18 @@ block scripts
 		$(() => {
 			// Handle any canvas code here
 			//----------------------------
-			
+
 			//Functions for sending a request to REST API.  These will be tied to buttons on the page for ease of testing.
 			function incrementPopulation(id) {
 				//Make the POST request to increment a zone's population
 				var xhttp = new XMLHttpRequest();
-				xhttp.open("POST", "/incrementPopulation/" + id.toString(), false);
+				xhttp.open("Get", "/incrementPopulation/" + id.toString(), false);
 				xhttp.setRequestHeader("Content-type", "application/json");
 				xhttp.send();
 				var response = JSON.parse(xhttp.responseText);
 				//console.log(response);
 			}
-			
+
 			function getPopulation(id) {
 				//Make the GET request to find out a zone's population
 				var xhttp = new XMLHttpRequest();
@@ -79,29 +79,29 @@ block scripts
 				var response = JSON.parse(xhttp.responseText);
 				return response;
 			}
-			
+
 			//On Click events for the different buttons
 			var id = 0;
 			var zone1 = $('#zone-1').click(function(){
 				id = 1;
-				incrementPopulation(id);				
+				incrementPopulation(id);
 			});
-			
+
 			var zone2 = $('#zone-2').click(function(){
 				id = 2;
 				incrementPopulation(id);
 			});
-			
+
 			var zone3 = $('#zone-3').click(function(){
 				id = 3;
 				incrementPopulation(id);
 			});
-			
+
 			var zone4 = $('#zone-4').click(function(){
 				id = 4;
 				incrementPopulation(id);
 			});
-			
+
 			var get = $('#get').click(function(){
 				console.log('Current Populations');
 				//Iterate through zones and print their populations
@@ -109,10 +109,10 @@ block scripts
 					console.log(i.toString() + ": " + getPopulation(i).toString());
 				}
 			});
-			
+
 			//Coordinates for the Ridge
 			var center = [29.632368, -82.379892]
-			
+
 			//variables for ease of testing beacons.
 			var left = -82.3799, right = -82.3798, top = 29.6324, bot = 29.6323;
 
@@ -141,45 +141,45 @@ block scripts
 				lat: bot,
 				lon: left
 			};
-			
+
 			var zones = [zone1, zone2, zone3, zone4];
-			
+
 			//Code for markers
 			map = new OpenLayers.Map("map");
 		    map.addLayer(new OpenLayers.Layer.OSM());
-		    
+
 		    epsg4326 =  new OpenLayers.Projection("EPSG:4326"); //WGS 1984 projection
 		    projectTo = map.getProjectionObject(); //The map projection (Spherical Mercator)
-		   
+
 			//Coordinates for center of map
 		    var lonLat = new OpenLayers.LonLat( -82.379892 ,29.632368 ).transform(epsg4326, projectTo);
-		          
+
 		    //Center the map at the Ridge with zoom 18
 		    var zoom=18;
 		    map.setCenter(lonLat, zoom);
 
 			//Create vector layer that will contain markers
 		    var vectorLayer = new OpenLayers.Layer.Vector("Overlay");
-		    
+
 			// Define markers as "features" of the vector layer:
 			for(var i = 0; i < zones.length; i++) {
 				var feature = new OpenLayers.Feature.Vector(
 						new OpenLayers.Geometry.Point( zones[i].lon, zones[i].lat ).transform(epsg4326, projectTo),
 						{description:'This is '+zones[i].name+'.<br>Population: ', id: zones[i].id} ,
 						{externalGraphic: 'http://labs.google.com/ridefinder/images/mm_20_red.png', graphicHeight: 20, graphicWidth: 12, graphicXOffset:0, graphicYOffset: -20  }
-					);    
+					);
 				vectorLayer.addFeatures(feature);
-			}			
-			
-			//Add the Vector layer to the map  
+			}
+
+			//Add the Vector layer to the map
 		    map.addLayer(vectorLayer);
-			
-		    
+
+
 		    //Add a selector control to the vectorLayer with popup functions
 		    var controls = {
 		      selector: new OpenLayers.Control.SelectFeature(vectorLayer, { onSelect: createPopup, onUnselect: destroyPopup })
 		    };
-			
+
 		    function createPopup(feature) {
 		      feature.popup = new OpenLayers.Popup.FramedCloud("pop",
 		          feature.geometry.getBounds().getCenterLonLat(),
@@ -192,17 +192,14 @@ block scripts
 		      feature.popup.closeOnMove = true;
 		      map.addPopup(feature.popup);
 		    }
-			
+
 		    function destroyPopup(feature) {
 		      feature.popup.destroy();
 		      feature.popup = null;
 		    }
-		    
+
 		    map.addControl(controls['selector']);
 		    controls['selector'].activate();
-								
+
 			//----------------------------
 		});
-		
-	
-	

@@ -11,23 +11,44 @@ var express   = require('express'),
 var pug       = require('pug');
 var sockets   = require('socket.io');
 var path      = require('path');
+var mqttReq   = require('mqtt')
+var client    = mqttReq.connect();
+
+client.subscribe("1increment");
+client.subscribe("2increment");
+client.subscribe("3increment");
+client.subscribe("4increment");
+//
+client.on("message", function(topic, payload) {
+	console.log([topic, payload].join(": "));
+	if(topic.search("increment") > 0) {
+		var zoneId = topic.substring(0, topic.search("increment"));
+		incrementPopulation(zoneId);
+		if(isOverCapacity(zoneId)){
+			var capacityTopic = zoneId + 'capacity';
+			client.publish(capacityTopic, "1");
+		}
+	}
+});
+//
+
 
 var conf      = require(path.join(__dirname, 'config'));
 var internals = require(path.join(__dirname, 'internals'));
+
 
 //Vars we update as people enter areas
 var population1 = 0, population2 = 0, population3 = 0, population4 = 0;
 
 //Vars to keep track of max population at each Zone
-var max1 = 10, max2 = 5, max3 = 3, max4 = 2;
+var max1 = 2, max2 = 5, max3 = 3, max4 = 2;
 
 // -- Setup the application
 setupExpress();
 setupSocket();
 
 //Check if a Zone is over capacity and send a message to the capacity sensor if it is
-function isOverCapacity(id, mqtt){
-	var validInput = true;
+function isOverCapacity(id){
 	var tempPopulation = 0, tempMax = 1;
 
 	switch(id){
@@ -49,46 +70,36 @@ function isOverCapacity(id, mqtt){
 			break;
 		default:
 			console.log('isOverCapacity: Invalid Zone ID');
-			validInput = false;
+			return false;
 	}
 
-	if(validInput == true) {
-		if(tempPopulation > tempMax) {
-			console.log('Population in Zone ' + id + ' is ' + tempPopulation + ' which is greater than the max ' + tempMax);
-			var topic = client.id + 'capacity'
-			var message = {
-				topic: topic,
-				payload: '1', // or a Buffer
-				qos: 0, // 0, 1, or 2
-				retain: false // or true
-			};
-			mqtt.publish(message, function() {
-				console.log('Published to topic: ' + topic);
-			});
-		} else {
-			//console.log('Population in Zone ' + id + ' is ' + tempPopulation + ' which is less than the max ' + tempMax);
-		}
+	if(tempPopulation > tempMax) {
+		console.log('Population in Zone ' + id + ' is ' + tempPopulation + ' which is greater than the max ' + tempMax);
+
+		return true;
+	} else {
+		return false;
 	}
 }
 
 //Get the Population at a Zone.  Allows MQTT and REST to use the same interface
-function getPopulation(id, mqtt){
+function getPopulation(id){
 	var validInput = true;
 	switch(id) {
 		case '1':
-			isOverCapacity(id, mqtt);
+			//isOverCapacity(id);
 			return(population1);
 			break;
 		case '2':
-			isOverCapacity(id, mqtt);
+			//isOverCapacity(id);
 			return(population2);
 			break;
 		case '3':
-			isOverCapacity(id, mqtt);
+			//isOverCapacity(id);
 			return(population3);
 			break;
 		case '4':
-			isOverCapacity(id, mqtt);
+			//isOverCapacity(id);
 			return(population4);
 			break;
 		default:
@@ -100,7 +111,7 @@ function getPopulation(id, mqtt){
 }
 
 //Used to increment the Population at a zone, when a capacity sensor publishes its population.  Encapsulates the logic so that MQTT and REST can both increase the population from the same interface
-function incrementPopulation(id, mqtt){
+function incrementPopulation(id){
 	var validInput = true;
 	switch(id){
 		case '1':
@@ -120,7 +131,7 @@ function incrementPopulation(id, mqtt){
 	}
 
 	if(validInput) {
-		getPopulation(id, mqtt);
+		getPopulation(id);
 	} else {
 		console.log('incrementPopulation: Invalid Zone ID');
 	}
@@ -160,12 +171,12 @@ function socket_handler(socket, mqtt) {
 		});
 
 
-		//if(data.topic.contains("capacity")) {
-			//console.log('publishing capacity');
-		//} else if (data.topic.contains("increment")){
-			console.log('incrementing ' + client.id);
-			incrementPopulation(client.id, mqtt);
-		//}
+		if(data.topic.search("increment") > 0) {
+			var incrementId = data.topic.substring(0, data.topic.search("increment"));
+			incrementPopulation(incrementId);
+		} else if (data.topic.search("capacity") > 0) {
+			console.log('Publishing over capacity');
+		}
 
 		console.log('Client "' + client.id + '" published "' + JSON.stringify(data) + '"');
 
@@ -193,6 +204,8 @@ function socket_handler(socket, mqtt) {
 		});
 		console.log('Client "' + client.id + '" unsubscribed from "' + topic + '"');
 	});
+
+	//mqtt.on('')
 }
 // ----------------------------------------------------------------------------
 
@@ -215,11 +228,9 @@ function setupExpress() {
 	//This is where the RESTful API request handling will be
 
 	//Increase the population at a beacon with a specified ID
-	app.post('/incrementPopulation/:beaconID', (req, res) => {
+	app.get('/incrementPopulation/:beaconID', (req, res) => {
 
 		incrementPopulation(req.params.beaconID);
-
-		//console.log('Zone ' + req.params.beaconID + ' had its population increased to ' + getPopulation(req.params.beaconID).toString());
 
 		res.end( 'success' );
 	});
