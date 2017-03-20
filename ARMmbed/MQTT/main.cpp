@@ -5,14 +5,18 @@
 #include "k64f.h"
 
 // connect options for MQTT broker
-#define BROKER "192.168.0.104"   // MQTT broker URL, original"broker.mqttdashboard.com"
+#define BROKER "broker.hivemq.com"   // MQTT broker URL, original"broker.mqttdashboard.com"
 #define PORT 1883                           // MQTT broker port number
-#define CLIENTID "baecons2"                         // use K64F MAC address without colons
+#define CLIENTID "2"                        // ID corresponding to the zone The board respresents 1-4
 #define USERNAME ""                         // not required for MQTT Dashboard public broker 
 #define PASSWORD ""                         // not required for MQTT Dashboard public broker
-#define TOPIC "hotbaecons"                            // MQTT topic
+#define TOPIC_PUB "2increment"              // topic publishing to for the particular zone 1-4
+#define TOPIC_SUB "2capacity"               // topic subscribed to for server notifying zone 1-4 over capacity
 
 Queue<uint32_t, 6> messageQ;
+
+//debugging lights throughout code only appear while board is starting up
+//and while it is connecting to the server/broker
 
 // LED color control function 
 void controlLED(color_t led_color) {
@@ -20,17 +24,17 @@ void controlLED(color_t led_color) {
         case red :
             greenLED = blueLED = 1;          
             redLED = 0.7;
-            wait(1.0f);
+            wait(0.3f);
             break;
         case green :
             redLED = blueLED = 1;
             greenLED = 0.7;
-            wait(1.0f);
+            wait(0.3f);
             break;
         case blue :
             redLED = greenLED = 1;
             blueLED = 0.7;
-            wait(1.0f);
+            wait(0.3f);
             break;
         case off :
             redLED = greenLED = blueLED = 1;
@@ -55,42 +59,20 @@ void sw3_ISR(void) {
 void messageArrived(MQTT::MessageData& md) {
     MQTT::Message &message = md.message;
     pc.printf("Receiving MQTT message:  %.*s\r\n", message.payloadlen, (char*)message.payload);
-    redLED = greenLED = .7;
-    wait(0.5f);
-    redLED = greenLED = 1;
-    blueLED = .7;
-    wait(0.5f);
-    blueLED = 1;
-    wait(0.5f);
-    
-    if (message.payloadlen == 3) {
-        if (strncmp((char*)message.payload, "red", 3) == 0){
-            controlLED(red);
-            wait(1.0f);
-            }
-        
-        else if(strncmp((char*)message.payload, "grn", 3) == 0){
-            controlLED(green);
-            wait(1.0f);
-            }
-        
-        else if(strncmp((char*)message.payload, "blu", 3) == 0){
-            controlLED(blue);
-            wait(1.0f);
-            }
-        
-        else if(strncmp((char*)message.payload, "off", 3) == 0){
-            controlLED(off);
-            wait(1.0f);
-            }
-    }        
+    while(true){
+        //over capacity flash red until program restarts
+        controlLED(red);
+        wait(0.1f);
+        controlLED(off);
+        wait(0.1f);
+        }      
 }
 
 int main() {
     // turn off LED  
     controlLED(off);
-    controlLED(red);
-    wait(1.0f);
+    controlLED(red);    //debugging lights
+    wait(0.3f);
     controlLED(off);
     
     // set SW2 and SW3 to generate interrupt on falling edge 
@@ -104,7 +86,7 @@ int main() {
     MQTTEthernet ipstack = MQTTEthernet();
     
     controlLED(red);
-    wait(1.0f);
+    wait(0.3);          //debugging lights
     controlLED(off);
     
     // get and display client network info
@@ -113,24 +95,24 @@ int main() {
     pc.printf("MAC address is %s\r\n", eth.getMACAddress());
     pc.printf("Gateway address is %s\r\n", eth.getGateway());
     
-    controlLED(red);
-    wait(1.0f);
+    controlLED(red);        //debugging lights
+    wait(0.3f);
     controlLED(off);
     
     // construct the MQTT client
     MQTT::Client<MQTTEthernet, Countdown> client = MQTT::Client<MQTTEthernet, Countdown>(ipstack);
     
-    controlLED(blue);
-    wait(1.0f);
+    controlLED(blue);       //debugging lights
+    wait(0.3f);
     controlLED(off);
-    wait(1.0f);
+    wait(0.3f);
     
     char* hostname = BROKER;
     int port = PORT;
     int rc;
     
-    controlLED(blue);
-    wait(1.0f);
+    controlLED(blue);       //debugging lights
+    wait(0.3f);
     controlLED(off);
     
     
@@ -139,20 +121,20 @@ int main() {
     // connect to TCP socket and check return code
     if ((rc = ipstack.connect(hostname, port)) != 0){
         pc.printf("failed: rc= %d\r\n", rc);
-        controlLED(red);
-        wait(1.0f);
+        controlLED(red);                                    //debugging lights
+        wait(0.3f);
         controlLED(off);
         }
         
     else{
         pc.printf("success\r\n");
-        controlLED(green);
-        wait(1.0f);
+        controlLED(green);                                  //debugging lights
+        wait(0.3f);
         controlLED(off);
         }
         
-    controlLED(blue);
-    wait(1.0f);
+    controlLED(blue);                                       //debugging lights
+    wait(0.3f);
     controlLED(off);
     
     MQTTPacket_connectData data = MQTTPacket_connectData_initializer;       
@@ -162,44 +144,44 @@ int main() {
 //    data.username.cstring = USERNAME;
 //    data.password.cstring = PASSWORD;
 
-    wait(1.0f);
+    wait(0.3f);                             //debugging lights
     controlLED(blue);
-    wait(1.0f);
+    wait(0.3f);
     controlLED(off);
     
     // send MQTT connect packet and check return code
     pc.printf("Attempting MQTT connect to %s:%d: ", hostname, port);
     if ((rc = client.connect(data)) != 0){
         pc.printf("failed: rc= %d\r\n", rc);
-        controlLED(red);
-        wait(1.0f);
+        controlLED(red);                        //debugging lights
+        wait(0.3f);
         controlLED(off);
         }
         
     else{
         pc.printf("success\r\n");
-        controlLED(green);
+        controlLED(green);                      //debugging lights
         controlLED(red);
-        wait(1.0f);
+        wait(0.3f);
         controlLED(off);
         }
         
-    char* topic = TOPIC;
+    char* topic = TOPIC_SUB;
     
     // subscribe to MQTT topic
     pc.printf("Subscribing to MQTT topic %s: ", topic);
     if ((rc = client.subscribe(topic, MQTT::QOS0, messageArrived)) != 0){
         pc.printf("failed: rc= %d\r\n", rc);
-        controlLED(red);
-        wait(1.0f);
+        controlLED(red);                    //debugging lights
+        wait(0.3f);
         controlLED(off);
         }
         
     else{
         pc.printf("success\r\n");
-        wait(1.0f);
-        controlLED(green);
-        wait(1.0f);
+        wait(0.3f);
+        controlLED(green);                  //debugging lights
+        wait(0.3f);
         controlLED(off);
         }
         
@@ -221,9 +203,9 @@ int main() {
                     sprintf(buf, "sw2");
                 }
             pc.printf("Publishing MQTT message: %.*s\r\n", message.payloadlen, (char*)message.payload);
-            rc = client.publish(topic, message);
-            controlLED(green);
-            wait(1.0f);
+            rc = client.publish(TOPIC_PUB, message);
+            controlLED(green);                          //green light to show person in zone counted and message sent to server
+            wait(0.3f);
             controlLED(off);
             client.yield(100);
         }
